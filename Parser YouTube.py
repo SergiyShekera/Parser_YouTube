@@ -1,9 +1,11 @@
 import requests
 import csv
+import sys
 
 from bs4 import BeautifulSoup
 
 
+non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
 def get_html(url):
     r = requests.get(url)
@@ -31,7 +33,9 @@ def get_page_data(response):
         url = item.find('a').get('href')
         duration = item.find('span', class_='accessible-description').text.strip()
 
-        data = {'name': name, 'duration': duration, 'url': url}
+        data = {'name': name.translate(non_bmp_map),
+                'duration': duration.translate(non_bmp_map),
+                'url': url.translate(non_bmp_map)}
         write_csv(data)
 
 
