@@ -3,22 +3,44 @@ import csv
 import sys
 
 from bs4 import BeautifulSoup
+from Proxy import get_proxy
 
 
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
 def get_html(url):
-    r = requests.get(url)
-    return r
+
+    p = get_proxy()
+    
+    try:
+        
+        proxy = { p['schema']: p['address'] }
+        r = requests.get(url, proxies=proxy)
+        
+        print('Now used ' + p['schema'] + ' ' + p['address'])
+        
+        return r
+    
+    except:
+        
+        r = requests.get(url)
+        
+        print('The site did not provide https proxy, so now your proxy is used')
+
+        return r
+
 
 def write_csv(data):
+    
     with open('videos.csv', 'a') as f:
+        
         order = ['name', 'duration', 'url']
         writer = csv.DictWriter(f, fieldnames=order)
         writer.writerow(data)
 
 
 def get_page_data(response):
+    
     if 'html' in response.headers['Content-Type']:
         html = response.text
     else:
@@ -29,17 +51,20 @@ def get_page_data(response):
     items = soup.find_all('h3', class_='yt-lockup-title')
 
     for item in items:
+        
         name = item.find('a').text.strip()
         url = item.find('a').get('href')
-        duration = item.find('span', class_='accessible-description').text.strip()
+        #duration = item.find('span', class_='accessible-description').text.strip()
 
         data = {'name': name.translate(non_bmp_map),
-                'duration': duration.translate(non_bmp_map),
+                #'duration': duration.translate(non_bmp_map),
                 'url': url.translate(non_bmp_map)}
+        
         write_csv(data)
 
 
 def get_next(response):
+    
     if 'html' in response.headers['Content-Type']:
         html = response.text
     else:
@@ -57,11 +82,12 @@ def get_next(response):
 
 
 def main():
-    
+
     #add a channel address here
     url = ' Channel url '
 
     while True:
+
         response = get_html(url)
         get_page_data(response)
 
@@ -71,7 +97,6 @@ def main():
             continue
         else:
             break
-
 
 
 if __name__ == '__main__':
