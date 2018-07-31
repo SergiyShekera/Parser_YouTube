@@ -1,6 +1,7 @@
 import requests
 import csv
 import sys
+import re
 
 from bs4 import BeautifulSoup
 from Proxy import get_proxy
@@ -34,7 +35,7 @@ def write_csv(data):
     
     with open('videos.csv', 'a') as f:
         
-        order = ['name', 'duration', 'url']
+        order = ['name', 'views', 'duration', 'url']
         writer = csv.DictWriter(f, fieldnames=order)
         writer.writerow(data)
 
@@ -48,17 +49,30 @@ def get_page_data(response):
 
     soup = BeautifulSoup(html, 'lxml')
 
-    items = soup.find_all('h3', class_='yt-lockup-title')
+    items = soup.find_all('div', class_='yt-lockup-dismissable')
 
     for item in items:
         
-        name = item.find('a').text.strip()
-        url = item.find('a').get('href')
-        #duration = item.find('span', class_='accessible-description').text.strip()
+        i = item.find('div', 'yt-lockup-content')
+        
+        name = i.find('a').text.strip()
+        url = i.find('a').get('href')
+        
+        views = i.find('li').text.strip()
+        views = re.findall(r'\d+', views)       
+        views_str = str()
+        
+        for i in views:
+            views_str += i
+        
+        duration = item.find('span', class_='video-time').text.strip()
 
+               
         data = {'name': name.translate(non_bmp_map),
-                #'duration': duration.translate(non_bmp_map),
-                'url': url.translate(non_bmp_map)}
+                'views': views_str,
+                'duration': duration,
+                'url': url.translate(non_bmp_map)
+                }
         
         write_csv(data)
 
@@ -85,7 +99,7 @@ def main():
 
     #add a channel address here
     url = ' Channel url '
-
+    
     while True:
 
         response = get_html(url)
