@@ -5,7 +5,8 @@ import re
 
 from bs4 import BeautifulSoup
 from Proxy import get_proxy
-
+from get_like import get_like
+from get_dislike import get_dislike 
 
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
@@ -35,7 +36,7 @@ def write_csv(data):
     
     with open('videos.csv', 'a') as f:
         
-        order = ['name', 'views', 'duration', 'url']
+        order = ['name', 'views', 'like', 'dislike','duration', 'url']
         writer = csv.DictWriter(f, fieldnames=order)
         writer.writerow(data)
 
@@ -64,17 +65,26 @@ def get_page_data(response):
         
         for i in views:
             views_str += i
+
+        url = 'https://youtube.com' + url
+        
+        like = get_like(url)
+        dislike = get_dislike(url)
         
         duration = item.find('span', class_='video-time').text.strip()
 
                
-        data = {'name': name.translate(non_bmp_map),
+        data = {
+                'name': name.translate(non_bmp_map),
                 'views': views_str,
+                'like': like,
+                'dislike': dislike,
                 'duration': duration,
-                'url': url.translate(non_bmp_map)
+                'url': url
                 }
         
         write_csv(data)
+        #print(data)
 
 
 def get_next(response):
@@ -99,7 +109,7 @@ def main():
 
     #add a channel address here
     url = ' Channel url '
-    
+       
     while True:
 
         response = get_html(url)
