@@ -3,10 +3,12 @@ import csv
 import sys
 import re
 
+from multiprocessing import Pool
 from bs4 import BeautifulSoup
 from Proxy import get_proxy
 from get_like import get_like
 from get_dislike import get_dislike 
+
 
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
 
@@ -17,7 +19,7 @@ def get_html(url):
     try:
         
         proxy = { p['schema']: p['address'] }
-        r = requests.get(url, proxies=proxy)
+        r = requests.get(url, proxies=proxy, timeout=5)
         
         print('Now used ' + p['schema'] + ' ' + p['address'])
         
@@ -84,7 +86,7 @@ def get_page_data(response):
                 }
         
         write_csv(data)
-        #print(data)
+        print(data)
 
 
 def get_next(response):
@@ -104,17 +106,23 @@ def get_next(response):
 
     return url
 
-
+def make_all(url):
+    response = get_html(url)
+    get_page_data(response)
+    
 def main():
 
     #add a channel address here
     url = ' Channel url '
-       
+ 
+    urls = []
+    
     while True:
-
+        
         response = get_html(url)
-        get_page_data(response)
-
+        
+        urls.append(url)
+        
         url = get_next(response)
 
         if url:
@@ -122,6 +130,10 @@ def main():
         else:
             break
 
-
+    with Pool(15) as p:
+        p.map(make_all, urls)
+        
 if __name__ == '__main__':
     main()
+    print('Parsing finished')
+    q = input('press Enter to exit')
