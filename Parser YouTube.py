@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from Proxy import get_proxy
 from get_like import get_like
 from get_dislike import get_dislike 
+from write_database import write_database
 
 
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
@@ -85,8 +86,9 @@ def get_page_data(response):
                 'url': url
                 }
         
-        write_csv(data)
-        print(data)
+        #write_csv(data)
+        #print(data)
+        write_database(data)
 
 
 def get_next(response):
@@ -106,7 +108,7 @@ def get_next(response):
 
     return url
 
-def make_all(url):
+def make_all(url):   
     response = get_html(url)
     get_page_data(response)
     
@@ -134,6 +136,8 @@ def main():
         p.map(make_all, urls)
         
 if __name__ == '__main__':
+    
     main()
+    
     print('Parsing finished')
     q = input('press Enter to exit')
