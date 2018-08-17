@@ -1,47 +1,18 @@
 import requests
-import csv
 import sys
 import re
 
 from multiprocessing import Pool
 from bs4 import BeautifulSoup
-from Proxy import get_proxy
+from get_html import get_html
+from get_next import get_next
 from get_like import get_like
-from get_dislike import get_dislike 
+from get_dislike import get_dislike
+from write_csv import write_csv
 from write_database import write_database
 
 
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
-
-def get_html(url):
-
-    p = get_proxy()
-    
-    try:
-        
-        proxy = { p['schema']: p['address'] }
-        r = requests.get(url, proxies=proxy, timeout=5)
-        
-        print('Now used ' + p['schema'] + ' ' + p['address'])
-        
-        return r
-    
-    except:
-        
-        r = requests.get(url)
-        
-        print('The site did not provide https proxy, so now your proxy is used')
-
-        return r
-
-
-def write_csv(data):
-    
-    with open('videos.csv', 'a') as f:
-        
-        order = ['name', 'views', 'like', 'dislike','duration', 'url']
-        writer = csv.DictWriter(f, fieldnames=order)
-        writer.writerow(data)
 
 
 def get_page_data(response):
@@ -86,31 +57,15 @@ def get_page_data(response):
                 'url': url
                 }
         
-        #write_csv(data)
-        #print(data)
-        write_database(data)
+        write_csv(data)
+        print(data)
+        #write_database(data)
 
-
-def get_next(response):
-    
-    if 'html' in response.headers['Content-Type']:
-        html = response.text
-    else:
-        html = response.json()['load_more_widget_html']
-
-    soup = BeautifulSoup(html, 'lxml')
-
-    try:
-        href = soup.find('button', class_='load-more-button').get('data-uix-load-more-href')
-        url = 'https://youtube.com' + href
-    except:
-        url = ''
-
-    return url
 
 def make_all(url):   
     response = get_html(url)
     get_page_data(response)
+
     
 def main():
 
