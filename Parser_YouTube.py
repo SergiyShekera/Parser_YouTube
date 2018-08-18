@@ -6,8 +6,7 @@ from multiprocessing import Pool
 from bs4 import BeautifulSoup
 from get_html import get_html
 from get_next import get_next
-from get_like import get_like
-from get_dislike import get_dislike
+from get_like_dislike import get_like_dislike
 from write_csv import write_csv
 from write_database import write_database
 
@@ -42,8 +41,10 @@ def get_page_data(response):
 
         url = 'https://youtube.com' + url
         
-        like = get_like(url)
-        dislike = get_dislike(url)
+        ld = get_like_dislike(url)
+        
+        like = ld['like']
+        dislike = ld['dislike']
         
         duration = item.find('span', class_='video-time').text.strip()
 
@@ -60,6 +61,7 @@ def get_page_data(response):
         write_csv(data)
         print(data)
         #write_database(data)
+
 
 
 def make_all(url):   
@@ -89,6 +91,7 @@ def main():
 
     with Pool(15) as p:
         p.map(make_all, urls)
+        
         
 if __name__ == '__main__':
     
