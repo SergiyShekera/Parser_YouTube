@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+
 Base = declarative_base()
 
 class MyTable(Base):
@@ -32,13 +33,36 @@ class MyTable(Base):
                         self.like, self.dislike,
                         self.duration, self.url
                         )
+
+
+def connect_to_database():
+    
+    try:
+            
+        engine = create_engine('postgresql://postgres:root@localhost/test_db')
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        
+        data = {'engine' : engine,
+                'session' :session}
+        
+        return data
+
+    except:
+            
+        print('Fail to connect to the database')
+        
            
-engine = create_engine('postgresql://postgres:root@localhost/test_db')
-Session = sessionmaker(bind=engine)
-session = Session()
+engine = connect_to_database()
+engine = engine['engine']
+
 Base.metadata.create_all(engine)
 
+
 def write_database(data):
+
+    session = connect_to_database()
+    session = session['session']
         
     try:
             
