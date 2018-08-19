@@ -1,9 +1,12 @@
 import csv
 
-def read_csv():
 
-    # put in there csv file, which need to analysis
-    with open('videos.csv') as f:
+# put in there csv file, which need to analysis
+path = 'videos.csv'
+
+def read_csv(path):
+
+    with open(path) as f:
         
         data = csv.reader(f)
         
@@ -38,5 +41,5 @@ def print_inf(data):
     print('sum of dislikes = ' + str(data['dislikes']))
 
 
-data = read_csv()    
+data = read_csv(path)    
 print_inf(data)
