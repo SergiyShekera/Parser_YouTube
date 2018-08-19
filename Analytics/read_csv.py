@@ -28,10 +28,15 @@ def read_csv():
         }
 
     return data
-    
-data = read_csv()
 
-print('all videos = ' + str(data['video_count']))
-print('all views = ' + str(data['views']))
-print('all likes = ' + str(data['likes']))
-print('all dislikes = ' + str(data['dislikes']))
+
+def print_inf(data):
+    
+    print('all videos = ' + str(data['video_count']))
+    print('sum of views = ' + str(data['views']))
+    print('sum of likes = ' + str(data['likes']))
+    print('sum of dislikes = ' + str(data['dislikes']))
+
+
+data = read_csv()    
+print_inf(data)
