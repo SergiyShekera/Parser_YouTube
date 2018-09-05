@@ -2,9 +2,9 @@ import csv
 
 
 # put in there csv file, which need to analysis
-path = 'videos.csv'
+path = 'videos_old.csv'
 
-def read_csv(path):
+def get_csv_data(path):
 
     with open(path) as f:
         
@@ -41,5 +41,5 @@ def print_inf(data):
     print('sum of dislikes = ' + str(data['dislikes']))
 
 
-data = read_csv(path)    
-print_inf(data)
+#data = get_csv_data(path)    
+#print_inf(data)
